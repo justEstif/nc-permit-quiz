@@ -37,17 +37,20 @@ function quiz(){
     // ---- navigation ----
     go(v){this.session=null;this.view=v},
     endSession(){this.session=null},
-    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");this.view="dash"}},
+    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");this.session=null;this.view="dash"}},
 
     // ---- sessions ----
     startPractice(ids){
       ids=[...new Set(ids)];
+      if(!ids.length)return;
+      this.view="practice";
       const score=id=>{const s=this.stat(id);return s.bad*3-s.ok+(s.seen?0:2)};
       const queue=this.shuffle(ids).sort((a,b)=>score(b)-score(a)).slice(0,Math.min(ids.length,20));
       this.session={mode:"practice",queue,i:0,correct:0,answered:false,picked:-1,opts:[],done:false};
       this.loadOpts();
     },
     startExam(){
+      this.view="exam";
       this.session={mode:"exam",queue:this.shuffle(QUESTIONS.map(q=>q.id)).slice(0,25),
         i:0,correct:0,answered:false,picked:-1,opts:[],review:[],done:false,pass:false};
       this.loadOpts();
@@ -70,7 +73,7 @@ function quiz(){
       correct?(rec.ok++,rec.streak++):(rec.bad++,rec.streak=0);
       this.save();
       if(correct)s.correct++;
-      if(s.mode==="exam"){s.review.push({id:q.id,ok:correct,pick:i});s.i++;s.answered=false;s.picked=-1;
+      if(s.mode==="exam"){s.review.push({id:q.id,ok:correct,pick:q.o.indexOf(s.opts[i].t)});s.i++;s.answered=false;s.picked=-1;
         if(s.i>=s.queue.length)this.finishExam();else this.loadOpts();
         return;
       }

@@ -169,7 +169,7 @@
   </template>
 
   <!-- Active question (practice or exam) -->
-  <template x-if="session && !session.done">
+  <template x-if="session && !session.done && (session.mode==='practice' ? view==='practice' : view==='exam')">
     <div>
       <div class="ncp-card">
         <div class="ncp-meta"
@@ -180,20 +180,20 @@
         <div class="ncp-q" x-text="currentQ().q"></div>
         <template x-for="(o,i) of session.opts" :key="i">
           <button class="ncp-opt"
-                  :disabled="session.answered || session.mode==='exam'"
+                  :disabled="session.answered"
                   :class="session.answered && (o.correct ? 'correct' : (session.picked===i ? 'wrong' : ''))"
                   @click="answer(i)"
                   x-text="String.fromCharCode(65+i)+'. '+o.t"></button>
         </template>
         <template x-if="session.mode==='practice' && session.answered">
           <div>
-            <div class="ncp-expl" x-text="(session.picked===currentQ().a?'✅ Correct. ':'❌ Not quite. ')+currentQ().why"></div>
+            <div class="ncp-expl" x-text="(session.opts[session.picked].correct?'✅ Correct. ':'❌ Not quite. ')+currentQ().why"></div>
             <button class="ncp-btn primary" @click="nextQ()"
                     x-text="session.i+1>=session.queue.length ? 'Finish' : 'Next question →'"></button>
           </div>
         </template>
         <div class="ncp-small ncp-center" style="margin-top:.6rem"
-             x-text="session.mode==='exam' ? 'Answered: '+session.i+'/'+session.queue.length : 'Practice score: '+session.correct+'/'+session.i"></div>
+             x-text="session.mode==='exam' ? 'Answered: '+session.i+'/'+session.queue.length : 'Practice score: '+session.correct+'/'+(session.answered?session.i+1:session.i)"></div>
       </div>
       <template x-if="session.mode==='exam'">
         <button class="ncp-btn" @click="confirmEnd()">End & grade early</button>
@@ -202,7 +202,7 @@
   </template>
 
   <!-- Practice summary -->
-  <template x-if="session && session.done && session.mode==='practice'">
+  <template x-if="session && session.done && session.mode==='practice' && view==='practice'">
     <div class="ncp-card ncp-center">
       <h2 class="ncp-h2" x-text="session.correct+'/'+session.queue.length+' ('+Math.round(session.correct/session.queue.length*100)+'%)'"></h2>
       <p :class="pct()>=80?'ncp-pass':'ncp-fail'"
@@ -213,7 +213,7 @@
   </template>
 
   <!-- Exam result + review -->
-  <template x-if="session && session.done && session.mode==='exam'">
+  <template x-if="session && session.done && session.mode==='exam' && view==='exam'">
     <div>
       <div class="ncp-card ncp-center">
         <div class="ncp-meta">Exam result</div>
