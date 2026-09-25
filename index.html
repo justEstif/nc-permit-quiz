@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NC Permit Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" referrerpolicy="no-referrer">
+<link href="assets/vercel-brand.css" rel="stylesheet">
+<style>
+/* Page-owned styles built on Vercel Brand (vbg) public tokens. Custom namespace: ncp- */
+[x-cloak]{display:none!important}
+.ncp-root{margin:0;background:var(--vbg-background-100);color:var(--vbg-text-primary);font-family:var(--vbg-font-sans);line-height:var(--vbg-leading-body);min-height:100vh}
+.ncp-nav{background:var(--vbg-background-200);border-bottom:1px solid var(--vbg-border-default);padding:var(--vbg-space-3) var(--vbg-space-4);display:flex;gap:var(--vbg-space-3);align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5;backdrop-filter:blur(8px)}
+.ncp-nav h1{font-size:1rem;font-weight:600;margin:0;flex:1;letter-spacing:-.01em}
+.ncp-navgroup{display:flex;gap:var(--vbg-space-1);flex-wrap:wrap}
+.ncp-tab{border:1px solid transparent;background:transparent;color:var(--vbg-text-secondary);padding:.4rem .8rem;border-radius:var(--vbg-radius-small);cursor:pointer;font-size:.88rem;font-family:var(--vbg-font-sans)}
+.ncp-tab:hover{color:var(--vbg-text-primary);background:var(--vbg-background-100)}
+.ncp-tab.active{background:var(--vbg-surface-contrast);color:var(--vbg-text-on-contrast);border-color:var(--vbg-surface-contrast)}
+.ncp-main{max-width:44rem;margin:0 auto;padding:var(--vbg-space-6) var(--vbg-space-4) var(--vbg-space-10)}
+.ncp-card{background:var(--vbg-background-200);border:1px solid var(--vbg-border-default);border-radius:var(--vbg-radius);padding:var(--vbg-space-5);margin-bottom:var(--vbg-space-4)}
+.ncp-card h3{margin:0 0 var(--vbg-space-3);font-size:.95rem;font-weight:600}
+.ncp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--vbg-space-4)}
+.ncp-stat{text-align:center}
+.ncp-stat .big{font-size:1.75rem;font-weight:600;letter-spacing:-.02em;font-feature-settings:"tnum"}
+.ncp-stat .lbl{font-size:.75rem;color:var(--vbg-text-secondary)}
+.ncp-bar{height:6px;background:var(--vbg-border-subtle);border-radius:3px;overflow:hidden;margin:.35rem 0 .6rem}
+.ncp-bar i{display:block;height:100%;background:var(--vbg-text-primary);border-radius:3px;transition:width .3s}
+.ncp-btn{width:100%;padding:.7rem var(--vbg-space-3);border-radius:var(--vbg-radius-small);border:1px solid var(--vbg-border-default);background:var(--vbg-background-100);color:var(--vbg-text-primary);font-size:.95rem;font-family:var(--vbg-font-sans);font-weight:500;cursor:pointer;margin:.3rem 0;display:flex;justify-content:space-between;align-items:center;gap:var(--vbg-space-2);text-align:left}
+.ncp-btn:hover{border-color:var(--vbg-border-strong)}
+.ncp-btn.primary{background:var(--vbg-surface-contrast);color:var(--vbg-text-on-contrast);border-color:var(--vbg-surface-contrast)}
+.ncp-btn.primary:hover{opacity:.88}
+.ncp-btn span.sub{font-weight:400;opacity:.7;font-size:.85rem}
+.ncp-signimg{display:block;width:150px;height:150px;margin:var(--vbg-space-3) auto 0;border:1px solid var(--vbg-border-subtle);border-radius:var(--vbg-radius-small);padding:var(--vbg-space-2);background:var(--vbg-background-100)}
+.ncp-q{font-size:1.12rem;font-weight:600;line-height:var(--vbg-leading-title);margin:var(--vbg-space-2) 0 var(--vbg-space-4);letter-spacing:-.01em}
+.ncp-opt{display:block;width:100%;text-align:left;border:1px solid var(--vbg-border-default);background:var(--vbg-background-100);color:var(--vbg-text-primary);border-radius:var(--vbg-radius-small);padding:.7rem .9rem;margin-top:var(--vbg-space-2);cursor:pointer;font-size:.95rem;font-family:var(--vbg-font-sans);line-height:1.45}
+.ncp-opt:hover:not(:disabled){border-color:var(--vbg-border-strong)}
+.ncp-opt.correct{border-color:var(--vbg-color-success);background:var(--vbg-green-100);font-weight:600}
+.ncp-opt.wrong{border-color:var(--vbg-color-error);background:var(--vbg-red-100)}
+.ncp-opt:disabled{cursor:default}
+.ncp-expl{border-left:3px solid var(--vbg-border-strong);padding:.55rem .8rem;background:var(--vbg-background-100);margin-top:var(--vbg-space-4);font-size:.9rem;border-radius:0 var(--vbg-radius-small) var(--vbg-radius-small) 0}
+.ncp-meta{color:var(--vbg-text-secondary);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+.ncp-center{text-align:center}
+.ncp-pill{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.72rem;border:1px solid var(--vbg-border-default);color:var(--vbg-text-secondary)}
+.ncp-table{width:100%;border-collapse:collapse;font-size:.9rem;font-feature-settings:"tnum"}
+.ncp-table td,.ncp-table th{padding:.4rem .3rem;border-bottom:1px solid var(--vbg-border-subtle);text-align:left}
+.ncp-pass{color:var(--vbg-color-success);font-weight:600}.ncp-fail{color:var(--vbg-color-error);font-weight:600}
+.ncp-small{font-size:.85rem;color:var(--vbg-text-secondary)}
+.ncp-review{border:1px solid var(--vbg-border-subtle);border-radius:var(--vbg-radius-small);padding:var(--vbg-space-3);margin-bottom:var(--vbg-space-3)}
+.ncp-h2{margin:0;font-size:2rem;font-weight:600;letter-spacing:-.03em;line-height:var(--vbg-leading-display);font-feature-settings:"tnum"}
+.ncp-sectionlabel{display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem;margin-top:var(--vbg-space-2)}
+.ncp-sectionlabel span:last-child{color:var(--vbg-text-secondary);font-feature-settings:"tnum"}
+</style>
+</head>
+<body class="vbg-report ncp-root" x-data="quiz()" x-init="init()">
+
+<header class="ncp-nav">
+  <h1>NC Permit Practice</h1>
+  <nav class="ncp-navgroup">
+    <template x-for="v in ['dash','practice','exam','trouble']" :key="v">
+      <button class="ncp-tab" :class="view===v && 'active'" @click="go(v)" x-text="({dash:'Dashboard',practice:'Practice',exam:'Mock Exam',trouble:'Troubles'})[v]"></button>
+    </template>
+    <button class="ncp-tab" title="Reset all progress" @click="reset()">↺</button>
+  </nav>
+</header>
+
+<main id="main" class="ncp-main">
+
+  <!-- Dashboard -->
+  <template x-if="view==='dash'">
+    <div>
+      <div class="ncp-card">
+        <div class="ncp-grid">
+          <div class="ncp-stat"><div class="big" x-text="seenCount()+'/'+QUESTIONS.length"></div><div class="lbl">questions seen</div></div>
+          <div class="ncp-stat"><div class="big" x-text="accuracy()+'%'"></div><div class="lbl">lifetime accuracy</div></div>
+          <div class="ncp-stat"><div class="big" x-text="troubles().length"></div><div class="lbl">trouble questions</div></div>
+          <div class="ncp-stat"><div class="big" x-text="exams.length"></div><div class="lbl">mock exams taken</div></div>
+        </div>
+      </div>
+      <div class="ncp-card">
+        <h3>Progress by section</h3>
+        <template x-for="[key,name] of Object.entries(SECTION_NAMES)" :key="key">
+          <div>
+            <div class="ncp-sectionlabel"><span x-text="name"></span><span x-text="sectionSeen(key)+'/'+sectionTotal(key)"></span></div>
+            <div class="ncp-bar"><i :style="'width:'+(sectionSeen(key)/sectionTotal(key)*100)+'%'"></i></div>
+          </div>
+        </template>
+      </div>
+      <div class="ncp-card">
+        <h3>Start</h3>
+        <button class="ncp-btn primary" @click="startPractice(weakestIds())">Practice weakest questions first <span class="sub">20</span></button>
+        <button class="ncp-btn" @click="go('exam')">Take a mock exam <span class="sub">25 questions, 80% to pass</span></button>
+        <p class="ncp-small">Real test format: 25 questions drawn from the pool, 20 correct to pass, plus a separate road-signs test. No time limit.</p>
+      </div>
+    </div>
+  </template>
+
+  <!-- Practice picker -->
+  <template x-if="view==='practice'">
+    <div class="ncp-card">
+      <h3>Practice by section</h3>
+      <p class="ncp-small">Immediate feedback + explanation after each answer. Prioritizes questions you haven't seen or have missed.</p>
+      <template x-for="[key,name] of Object.entries(SECTION_NAMES)" :key="key">
+        <button class="ncp-btn" :class="sectionSeen(key)===sectionTotal(key) && ''" @click="startPractice(sectionIds(key))">
+          <span x-text="name"></span><span class="sub" x-text="sectionSeen(key)+'/'+sectionTotal(key)+' seen'"></span>
+        </button>
+      </template>
+      <button class="ncp-btn" @click="startPractice(QUESTIONS.map(q=>q.id))"><span>🔀 Mixed (all questions)</span><span class="sub" x-text="QUESTIONS.length"></span></button>
+    </div>
+  </template>
+
+  <!-- Troubles -->
+  <template x-if="view==='trouble'">
+    <div>
+      <template x-if="troubles().length===0">
+        <div class="ncp-card ncp-center">No trouble questions yet — misses show up here automatically.</div>
+      </template>
+      <template x-if="troubles().length>0">
+        <div>
+          <div class="ncp-card">
+            <h3>Missed questions (<span x-text="troubles().length"></span>)</h3>
+            <p class="ncp-small">Sorted by most-missed. Questions missed 2+ times are your weak spots.</p>
+            <table class="ncp-table">
+              <thead><tr><th>Question</th><th>✓</th><th>✗</th></tr></thead>
+              <tbody>
+                <template x-for="t in troubles()" :key="t.q.id">
+                  <tr>
+                    <td><span :class="t.s.bad>=2 && 'ncp-fail'" x-text="t.q.q"></span><br><span class="ncp-pill" x-text="SECTION_NAMES[t.q.section]"></span></td>
+                    <td x-text="t.s.ok"></td>
+                    <td class="ncp-fail" x-text="t.s.bad"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <button class="ncp-btn primary" @click="startPractice(troubles().map(t=>t.q.id))"><span x-text="'Practice these '+troubles().length+' questions'"></span></button>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <!-- Exam start / history -->
+  <template x-if="view==='exam' && !session">
+    <div>
+      <div class="ncp-card">
+        <h3>Mock Exam</h3>
+        <p>Mirrors the real thing: <strong>25 random questions</strong> from the full pool, no feedback until the end. Pass with <strong>20/25 (80%)</strong>.</p>
+        <button class="ncp-btn primary" @click="startExam()">Start exam</button>
+      </div>
+      <template x-if="exams.length">
+        <div class="ncp-card">
+          <h3>Past exams</h3>
+          <table class="ncp-table">
+            <thead><tr><th>When</th><th>Score</th><th>Result</th></tr></thead>
+            <tbody>
+              <template x-for="(e,i) of [...exams].reverse()" :key="i">
+                <tr>
+                  <td x-text="e.date"></td>
+                  <td x-text="e.score+'/25'"></td>
+                  <td :class="e.pass?'ncp-pass':'ncp-fail'" x-text="e.pass?'PASS':'FAIL'"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <!-- Active question (practice or exam) -->
+  <template x-if="session && !session.done">
+    <div>
+      <div class="ncp-card">
+        <div class="ncp-meta"
+             x-text="session.mode==='exam'
+               ? 'Exam question '+(session.i+1)+' of '+session.queue.length+' · question #'+currentQ().id
+               : SECTION_NAMES[currentQ().section]+' · question #'+currentQ().id"></div>
+        <template x-if="currentQ().img"><img class="ncp-signimg" :src="currentQ().img" alt="road sign" width="150" height="150"></template>
+        <div class="ncp-q" x-text="currentQ().q"></div>
+        <template x-for="(o,i) of session.opts" :key="i">
+          <button class="ncp-opt"
+                  :disabled="session.answered || session.mode==='exam'"
+                  :class="session.answered && (o.correct ? 'correct' : (session.picked===i ? 'wrong' : ''))"
+                  @click="answer(i)"
+                  x-text="String.fromCharCode(65+i)+'. '+o.t"></button>
+        </template>
+        <template x-if="session.mode==='practice' && session.answered">
+          <div>
+            <div class="ncp-expl" x-text="(session.picked===currentQ().a?'✅ Correct. ':'❌ Not quite. ')+currentQ().why"></div>
+            <button class="ncp-btn primary" @click="nextQ()"
+                    x-text="session.i+1>=session.queue.length ? 'Finish' : 'Next question →'"></button>
+          </div>
+        </template>
+        <div class="ncp-small ncp-center" style="margin-top:.6rem"
+             x-text="session.mode==='exam' ? 'Answered: '+session.i+'/'+session.queue.length : 'Practice score: '+session.correct+'/'+session.i"></div>
+      </div>
+      <template x-if="session.mode==='exam'">
+        <button class="ncp-btn" @click="confirmEnd()">End & grade early</button>
+      </template>
+    </div>
+  </template>
+
+  <!-- Practice summary -->
+  <template x-if="session && session.done && session.mode==='practice'">
+    <div class="ncp-card ncp-center">
+      <h2 class="ncp-h2" x-text="session.correct+'/'+session.queue.length+' ('+Math.round(session.correct/session.queue.length*100)+'%)'"></h2>
+      <p :class="pct()>=80?'ncp-pass':'ncp-fail'"
+         x-text="pct()>=80 ? 'Above the 80% passing bar. Keep going!' : 'Below 80% — review your Troubles, then retake.'"></p>
+      <button class="ncp-btn primary" @click="startPractice(session.queue)">Practice this set again</button>
+      <button class="ncp-btn" @click="endSession();go('dash')">Back to dashboard</button>
+    </div>
+  </template>
+
+  <!-- Exam result + review -->
+  <template x-if="session && session.done && session.mode==='exam'">
+    <div>
+      <div class="ncp-card ncp-center">
+        <div class="ncp-meta">Exam result</div>
+        <h2 class="ncp-h2" :class="session.pass?'ncp-pass':'ncp-fail'"
+            x-text="session.correct+'/'+session.review.length+' — '+(session.pass?'PASS':'FAIL')"></h2>
+        <p class="ncp-small"
+           x-text="session.pass ? 'Real passing bar: 20/25 (80%). You\u2019re ready-ish.' : 'Real passing bar: 20/25 (80%). Study the misses below, then retake after 7 days — like the real thing (or right away, we won\u2019t tell).'"></p>
+      </div>
+      <div class="ncp-card">
+        <h3>Review</h3>
+        <template x-for="r of session.review" :key="r.id">
+          <div class="ncp-review">
+            <div>
+              <span x-text="r.ok?'✅':'❌'"></span> <strong x-text="qById(r.id).q"></strong><br>
+              <span class="ncp-small" x-text="'Correct answer: '+qById(r.id).o[qById(r.id).a]"></span>
+              <template x-if="!r.ok">
+                <span class="ncp-small ncp-fail" x-text="' — You picked: '+qById(r.id).o[r.pick]"></span>
+              </template>
+              <div class="ncp-expl" x-text="qById(r.id).why"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <button class="ncp-btn primary" @click="endSession();go('exam')">Take another exam</button>
+      <button class="ncp-btn" @click="endSession();go('trouble')">Review trouble questions</button>
+    </div>
+  </template>
+
+</main>
+
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
