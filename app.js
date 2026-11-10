@@ -34,6 +34,13 @@ function quiz(){
     sectionTotal(key){return this.sectionIds(key).length},
     pct(){return this.session&&this.session.queue.length?Math.round(this.session.correct/this.session.queue.length*100):0},
 
+    // ---- flashcards ----
+    // short-form card per question: front = question, back = correct option
+    cardFor(id){
+      const q=this.qById(id);
+      return {front:q.q, back:q.o[q.a], why:q.why, img:q.img};
+    },
+
     // ---- navigation ----
     go(v){this.session=null;this.view=v},
     endSession(){this.session=null},
