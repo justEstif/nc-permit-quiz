@@ -88,6 +88,7 @@
           <div class="ncp-stat"><div class="big" x-text="accuracy()+'%'"></div><div class="lbl">lifetime accuracy</div></div>
           <div class="ncp-stat"><div class="big" x-text="troubles().length"></div><div class="lbl">trouble questions</div></div>
           <div class="ncp-stat"><div class="big" x-text="exams.length"></div><div class="lbl">mock exams taken</div></div>
+          <div class="ncp-stat"><div class="big" x-text="fcDueCount()"></div><div class="lbl">flashcards due</div></div>
         </div>
       </div>
       <div class="ncp-card">
@@ -102,6 +103,7 @@
       <div class="ncp-card">
         <h3>Start</h3>
         <button class="ncp-btn primary" @click="startPractice(weakestIds())">Practice weakest questions first <span class="sub">20</span></button>
+        <button class="ncp-btn" @click="go('flash')">Review flashcards <span class="sub" x-text="fcDueCount()+' due · '+(fcDueCount()+fcNewCount())+' total queued'"></span></button>
         <button class="ncp-btn" @click="go('exam')">Take a mock exam <span class="sub">25 questions, 80% to pass</span></button>
         <p class="ncp-small">Real test format: 25 questions drawn from the pool, 20 correct to pass, plus a separate road-signs test. No time limit.</p>
       </div>

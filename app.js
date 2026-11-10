@@ -49,7 +49,7 @@ function quiz(){
     fcNewCount(){return QUESTIONS.filter(q=>this.fcIsNew(q.id)).length},
     fcSetDue(id,ms){
       const c=this.FC[id]||{ease:2.5,interval:0,due:0,reps:0};
-      c.interval=1;c.due=Date.now()+ms;this.FC[id]=c;this.saveFC();
+      c.interval=1;c.due=Date.now()+ms;c.reps=Math.max(1,c.reps);this.FC[id]=c;this.saveFC();
     },
     // SM-2 (Anki-classic, 3 buttons). grade: 0=Again 1=Good 2=Easy
     fcRate(id,grade,relearn){
@@ -101,6 +101,9 @@ function quiz(){
       if(grade===0){
         s.relearned[id]=true;s.again++;
         s.queue.push(id); // same-session relearn
+        // Again also counts as a miss in quiz stats
+        this.S[id]=this.S[id]||{seen:0,ok:0,bad:0,streak:0};
+        this.S[id].seen++;this.S[id].bad++;this.S[id].streak=0;this.save();
       }else{grade===1?s.good++:s.easy++;delete s.relearned[id];}
       s.i++;s.flipped=false;
       if(s.i>=s.queue.length)s.done=true;
@@ -140,6 +143,7 @@ function quiz(){
       const rec=this.S[q.id];rec.seen++;
       correct?(rec.ok++,rec.streak++):(rec.bad++,rec.streak=0);
       this.save();
+      if(!correct)this.fcSetDue(q.id,0); // missed in quiz -> card due now
       if(correct)s.correct++;
       if(s.mode==="exam"){s.review.push({id:q.id,ok:correct,pick:q.o.indexOf(s.opts[i].t)});s.i++;s.answered=false;s.picked=-1;
         if(s.i>=s.queue.length)this.finishExam();else this.loadOpts();
