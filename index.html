@@ -51,6 +51,18 @@
 .ncp-h2{margin:0;font-size:2rem;font-weight:600;letter-spacing:-.03em;line-height:var(--vbg-leading-display);font-feature-settings:"tnum"}
 .ncp-sectionlabel{display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem;margin-top:var(--vbg-space-2)}
 .ncp-sectionlabel span:last-child{color:var(--vbg-text-secondary);font-feature-settings:"tnum"}
+.ncp-fccard{border:1px solid var(--vbg-border-default);border-radius:var(--vbg-radius-small);background:var(--vbg-background-100);padding:var(--vbg-space-5);min-height:12rem;display:flex;flex-direction:column;justify-content:center;cursor:pointer;margin:var(--vbg-space-3) 0;text-align:center}
+.ncp-fccard:hover{border-color:var(--vbg-border-strong)}
+.ncp-fccard .front{font-size:1.15rem;font-weight:600;line-height:var(--vbg-leading-title);letter-spacing:-.01em}
+.ncp-fccard .back{font-size:1.15rem;font-weight:600;color:var(--vbg-color-success)}
+.ncp-fcbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--vbg-space-2)}
+.ncp-fcbtns .ncp-btn{justify-content:center;margin:0}
+.ncp-fcbtns .again{color:var(--vbg-color-error)}
+.ncp-fcbtns .easy{color:var(--vbg-color-success)}
+.ncp-filterrow{display:flex;gap:var(--vbg-space-1);flex-wrap:wrap;margin-bottom:var(--vbg-space-3)}
+.ncp-chip{border:1px solid var(--vbg-border-default);background:var(--vbg-background-100);color:var(--vbg-text-secondary);padding:.25rem .7rem;border-radius:99px;font-size:.8rem;cursor:pointer;font-family:var(--vbg-font-sans)}
+.ncp-chip:hover{border-color:var(--vbg-border-strong)}
+.ncp-chip.active{background:var(--vbg-surface-contrast);color:var(--vbg-text-on-contrast);border-color:var(--vbg-surface-contrast)}
 </style>
 </head>
 <body class="vbg-report ncp-root" x-data="quiz()" x-init="init()">
@@ -58,8 +70,8 @@
 <header class="ncp-nav">
   <h1>NC Permit Practice</h1>
   <nav class="ncp-navgroup">
-    <template x-for="v in ['dash','practice','exam','trouble']" :key="v">
-      <button class="ncp-tab" :class="view===v && 'active'" @click="go(v)" x-text="({dash:'Dashboard',practice:'Practice',exam:'Mock Exam',trouble:'Troubles'})[v]"></button>
+    <template x-for="v in ['dash','practice','exam','flash','trouble']" :key="v">
+      <button class="ncp-tab" :class="view===v && 'active'" @click="go(v)" x-text="({dash:'Dashboard',practice:'Practice',exam:'Mock Exam',flash:'Flashcards',trouble:'Troubles'})[v]"></button>
     </template>
     <button class="ncp-tab" title="Reset all progress" @click="reset()">↺</button>
   </nav>
@@ -107,6 +119,76 @@
         </button>
       </template>
       <button class="ncp-btn" @click="startPractice(QUESTIONS.map(q=>q.id))"><span>🔀 Mixed (all questions)</span><span class="sub" x-text="QUESTIONS.length"></span></button>
+    </div>
+  </template>
+
+  <!-- Flashcards -->
+  <template x-if="view==='flash' && !fcSession">
+    <div>
+      <div class="ncp-card">
+        <h3>Flashcards</h3>
+        <p class="ncp-small">Spaced repetition (SM-2): rate each card Again / Good / Easy. Cards you miss in practice or exams show up here as due.</p>
+        <div class="ncp-filterrow">
+          <button class="ncp-chip" :class="fcFilter==='all' && 'active'" @click="fcFilter='all'">All</button>
+          <template x-for="[key,name] of Object.entries(SECTION_NAMES)" :key="key">
+            <button class="ncp-chip" :class="fcFilter===key && 'active'" @click="fcFilter=key" x-text="name"></button>
+          </template>
+        </div>
+        <button class="ncp-btn primary" @click="startReview(fcFilteredIds())">
+          <span>Review due cards</span>
+          <span class="sub" x-text="fcFilteredIds().filter(id=>fcDueNow(id)||fcIsNew(id)).length+' queued'"></span>
+        </button>
+      </div>
+      <div class="ncp-card">
+        <div class="ncp-grid">
+          <div class="ncp-stat"><div class="big" x-text="fcDueCount()"></div><div class="lbl">due now</div></div>
+          <div class="ncp-stat"><div class="big" x-text="fcNewCount()"></div><div class="lbl">new cards</div></div>
+          <div class="ncp-stat"><div class="big" x-text="QUESTIONS.length-fcNewCount()"></div><div class="lbl">in rotation</div></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Flashcard review -->
+  <template x-if="view==='flash' && fcSession && !fcSession.done">
+    <div>
+      <div class="ncp-card">
+        <div class="ncp-meta" x-text="fcMeta()"></div>
+        <div class="ncp-fccard" @click="fcFlip()">
+          <template x-if="!fcSession.flipped">
+            <div>
+              <template x-if="fcCard().img"><img class="ncp-signimg" :src="fcCard().img" alt="road sign" width="150" height="150"></template>
+              <div class="front" x-text="fcCard().front"></div>
+              <div class="ncp-small" style="margin-top:.8rem">tap to reveal</div>
+            </div>
+          </template>
+          <template x-if="fcSession.flipped">
+            <div>
+              <div class="ncp-small" x-text="fcCard().front"></div>
+              <div class="back" style="margin-top:.6rem" x-text="fcCard().back"></div>
+              <div class="ncp-expl" style="text-align:left" x-text="fcCard().why"></div>
+            </div>
+          </template>
+        </div>
+        <template x-if="fcSession.flipped">
+          <div class="ncp-fcbtns">
+            <button class="ncp-btn again" @click="fcAnswer(0)">Again</button>
+            <button class="ncp-btn" @click="fcAnswer(1)">Good</button>
+            <button class="ncp-btn easy" @click="fcAnswer(2)">Easy</button>
+          </div>
+        </template>
+        <div class="ncp-small ncp-center" style="margin-top:.6rem" x-text="'Again '+fcSession.again+' · Good '+fcSession.good+' · Easy '+fcSession.easy"></div>
+      </div>
+      <button class="ncp-btn" @click="endReview()">End review session</button>
+    </div>
+  </template>
+
+  <!-- Flashcard summary -->
+  <template x-if="view==='flash' && fcSession && fcSession.done">
+    <div class="ncp-card ncp-center">
+      <h2 class="ncp-h2" x-text="fcSession.queue.length+' cards reviewed'"></h2>
+      <p class="ncp-small" x-text="'Again '+fcSession.again+' · Good '+fcSession.good+' · Easy '+fcSession.easy"></p>
+      <button class="ncp-btn primary" @click="endReview()">Back to flashcards</button>
     </div>
   </template>
 

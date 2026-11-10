@@ -71,9 +71,41 @@ function quiz(){
     },
 
     // ---- navigation ----
-    go(v){this.session=null;this.view=v},
+    go(v){this.session=null;this.fcSession=null;this.view=v},
     endSession(){this.session=null},
-    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");localStorage.removeItem("ncpermit-v1-fc");this.FC={};this.session=null;this.view="dash"}},
+    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");localStorage.removeItem("ncpermit-v1-fc");this.FC={};this.session=null;this.fcSession=null;this.view="dash"}},
+
+    // ---- flashcard sessions ----
+    fcSession:null, fcFilter:"all",
+    fcFilteredIds(){
+      return this.fcFilter==="all"?QUESTIONS.map(q=>q.id):this.sectionIds(this.fcFilter);
+    },
+    startReview(ids){
+      const due=ids.filter(id=>this.fcDueNow(id));
+      const fresh=ids.filter(id=>this.fcIsNew(id));
+      const queue=this.shuffle(due).concat(this.shuffle(fresh));
+      if(!queue.length)return;
+      this.fcSession={queue,i:0,flipped:false,relearned:{},done:false,again:0,good:0,easy:0};
+    },
+    fcCard(){const s=this.fcSession;return s?this.cardFor(s.queue[s.i]):null},
+    fcMeta(){
+      const s=this.fcSession;const q=this.qById(s.queue[s.i]);
+      return SECTION_NAMES[q.section]+' · card '+(s.i+1)+' of '+s.queue.length;
+    },
+    fcFlip(){this.fcSession.flipped=!this.fcSession.flipped},
+    fcAnswer(grade){
+      const s=this.fcSession;if(!s||s.done)return;
+      const id=s.queue[s.i];
+      const relearn=!!s.relearned[id];
+      this.fcRate(id,grade,relearn);
+      if(grade===0){
+        s.relearned[id]=true;s.again++;
+        s.queue.push(id); // same-session relearn
+      }else{grade===1?s.good++:s.easy++;delete s.relearned[id];}
+      s.i++;s.flipped=false;
+      if(s.i>=s.queue.length)s.done=true;
+    },
+    endReview(){this.fcSession=null},
 
     // ---- sessions ----
     startPractice(ids){
