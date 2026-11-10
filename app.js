@@ -9,8 +9,10 @@ function quiz(){
     init(){
       try{this.S=JSON.parse(localStorage.getItem("ncpermit-v1")||"{}")}catch(e){this.S={}}
       try{this.exams=JSON.parse(localStorage.getItem("ncpermit-v1-exams")||"[]")}catch(e){this.exams=[]}
+      try{this.FC=JSON.parse(localStorage.getItem("ncpermit-v1-fc")||"{}")}catch(e){this.FC={}}
     },
     save(){localStorage.setItem("ncpermit-v1",JSON.stringify(this.S))},
+    saveFC(){localStorage.setItem("ncpermit-v1-fc",JSON.stringify(this.FC))},
 
     // ---- derived ----
     stat(id){return this.S[id]||{seen:0,ok:0,bad:0,streak:0}},
@@ -40,11 +42,38 @@ function quiz(){
       const q=this.qById(id);
       return {front:q.q, back:q.o[q.a], why:q.why, img:q.img};
     },
+    fcState(id){return this.FC[id]||{ease:2.5,interval:0,due:0,reps:0}},
+    fcDueNow(id){const c=this.fcState(id);return c.reps>0&&c.due<=Date.now()},
+    fcIsNew(id){return this.fcState(id).reps===0},
+    fcDueCount(){return QUESTIONS.filter(q=>this.fcDueNow(q.id)).length},
+    fcNewCount(){return QUESTIONS.filter(q=>this.fcIsNew(q.id)).length},
+    fcSetDue(id,ms){
+      const c=this.FC[id]||{ease:2.5,interval:0,due:0,reps:0};
+      c.interval=1;c.due=Date.now()+ms;this.FC[id]=c;this.saveFC();
+    },
+    // SM-2 (Anki-classic, 3 buttons). grade: 0=Again 1=Good 2=Easy
+    fcRate(id,grade,relearn){
+      const c=this.FC[id]||{ease:2.5,interval:0,due:0,reps:0};
+      const DAY=864e5;
+      if(grade===0){ // Again: reset, due tomorrow
+        c.ease=Math.max(1.3,c.ease-0.15);
+        c.interval=1;c.due=Date.now()+DAY;c.reps=0;
+      }else if(relearn){ // graduating a relearned card: short interval
+        c.ease=Math.max(1.3,c.ease+(grade===2?0.15:0));
+        c.interval=grade===2?3:1;c.due=Date.now()+c.interval*DAY;c.reps=1;
+      }else{
+        c.ease=Math.max(1.3,c.ease+(grade===2?0.15:0));
+        let base=c.reps===0?1:(c.reps===1?6:Math.round(c.interval*c.ease));
+        if(grade===2)base=Math.max(3,Math.ceil(base*1.3)); // Easy bonus (min 3d)
+        c.interval=Math.min(base,365);c.due=Date.now()+c.interval*DAY;c.reps++;
+      }
+      this.FC[id]=c;this.saveFC();
+    },
 
     // ---- navigation ----
     go(v){this.session=null;this.view=v},
     endSession(){this.session=null},
-    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");this.session=null;this.view="dash"}},
+    reset(){if(confirm("Erase all progress?")){this.S={};this.exams=[];localStorage.removeItem("ncpermit-v1");localStorage.removeItem("ncpermit-v1-exams");localStorage.removeItem("ncpermit-v1-fc");this.FC={};this.session=null;this.view="dash"}},
 
     // ---- sessions ----
     startPractice(ids){
